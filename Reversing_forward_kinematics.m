@@ -34,6 +34,8 @@ end
 S = solve(eqnSet)
 
 function Pose = fkin(JointAngles)
+
+% The UR5's DH-parameters taken from https://www.universal-robots.com/articles/ur/application-installation/dh-parameters-for-calculations-of-kinematics-and-dynamics
 a = [0 -0.425 -0.39225 0 0 0];
 d = [0.089159 0 0 0.10915 0.09465 0.0823];
 alpha = [pi/2 0 0 pi/2 -pi/2 0];
