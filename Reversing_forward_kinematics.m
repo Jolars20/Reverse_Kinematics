@@ -1,19 +1,14 @@
 
- % In this case we use those from "KUKA KR 6 R900-2" but any robot's
- % parameters and joint ranges could be used.
- robot = 'KUKA-KR-6-R900-2';
- 
+ % In this case we use those from "UR-5" but any robot's
+ % parameters and joint ranges could be used
+ clear
   Angles = zeros(6,24);
-  RDKpose = zeros(4,4,24);
+  pose = zeros(4,4,24);
   for i = 1:24
-        Angles(1,i) = randi([-170 170]); 
-        Angles(2,i) = randi([-190 45]); 
-        Angles(3,i) = randi([-120 156]); 
-        Angles(4,i) = randi([-185 185]); 
-        Angles(5,i) = randi([-120 120]); 
-        Angles(6,i) = randi([-350 350]); 
-        
-        RDKpose(1:4,1:4,i) = RDKRobPose(robot, Angles(1:6,i))
+      for j = 1:6
+        Angles(j,i) = randi([-360 360]); 
+      end
+        pose(1:4,1:4,i) = fkin(Angles(1:6,i));
   end 
   
 %%
@@ -31,12 +26,18 @@ eqnSet = sym(zeros(4,4,24));
 for i = 1:24
     for j = 1:4
         for h = 1:4
-            
-            %eqnSet = [eqnSet eqn];
+            eqnSet(h,j,i)= T0_6(h,j,i) == pose(h,j,i);  
         end 
    end
 end
-%S = solve(T0_6 == RDKpose, a,alpha,d,thetaOff)
+%%
+S = solve(eqnSet)
 
-%% 
-eqn = [x + 2*y == u, 4*x + 5*y == v]
+function Pose = fkin(JointAngles)
+a = [0 -0.425 -0.39225 0 0 0];
+d = [0.089159 0 0 0.10915 0.09465 0.0823];
+alpha = [pi/2 0 0 pi/2 -pi/2 0];
+
+% Finding end effector related to base using general DHP transformations
+Pose = DHTrans(a, alpha, d, zeros(1,6), JointAngles);
+end
